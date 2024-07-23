@@ -15,8 +15,9 @@ class Book extends Model
         'title',
         'description',
         'image_url',
-        'isbn',
-        'category_id'
+        'image',
+        'category_id',
+        'isbn'
     ];
 
     public function category(): BelongsTo {

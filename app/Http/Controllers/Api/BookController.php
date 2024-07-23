@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Book;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class BookController extends Controller
@@ -34,6 +36,7 @@ class BookController extends Controller
             'title'=>'required',
             'description'=>'required',
             'image_url'=>'required',
+            'image'=>'required',
             'isbn'=>'required'
         ];
 
@@ -46,12 +49,21 @@ class BookController extends Controller
             ]);
         }
 
+        $image = null;
+        if ($request->has('image')) {
+            $image = $request->image;
+            $name = time() .'.'. $image->extension();
+            $path = public_path('uploud');
+            $image = $image->move($path, $name);
+        }
+
         $bookdata->title = $request->title;
         $bookdata->description = $request->description;
         $bookdata->image_url = $request->image_url;
+        $bookdata->image = $request->image;
+        $bookdata->image = $name;
         $bookdata->isbn = $request->isbn;
         $bookdata->category_id = $request->category_id;
-
         $bookdata->save();
 
         return response()->json([
@@ -98,21 +110,32 @@ class BookController extends Controller
             'title'=>'required',
             'description'=>'required',
             'image_url'=>'required',
-            'isbn'=>'required'
+            'image'=>'required',
+            'isbn'=>'required',
+            'category_id'=>'required'
         ];
 
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return response()->json([
                 'status'=>false,
-                'message'=>'Data berhasil diUpdate',
+                'message'=>'Data belum berhasil diupdate',
                 'Data'=>$validator->errors()
-            ]);
+            ], 422);
+        }
+
+        $image = null;
+        if ($request->has('image')) {
+            $path = public_path('uploud');
+            $image = $request->image;
+            $name = time() .'.'. $image->extension();
+            $image = $image->move($path, $name);
         }
 
         $bookdata->title = $request->title;
         $bookdata->description = $request->description;
         $bookdata->image_url = $request->image_url;
+        $bookdata->image = $name;
         $bookdata->isbn = $request->isbn;
         $bookdata->category_id = $request->category_id;
 
@@ -142,5 +165,15 @@ class BookController extends Controller
             'message'=>'Data Berhasil DiHapus',
             'Data'=>$post
         ]);
+    }
+
+    function generateRandomString($length = 10) {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[random_int(0, $charactersLength - 1)];
+        }
+        return $randomString;
     }
 }
