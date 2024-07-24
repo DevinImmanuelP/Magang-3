@@ -28,4 +28,4 @@ Route::patch('/book-categories/{id}/publish', [CategoryController::class, 'publi
 Route::patch('/book-categories/{id}/unpublish', [CategoryController::class, 'unpublish'])->middleware('auth:sanctum');
 
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout']);
+Route::get('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
